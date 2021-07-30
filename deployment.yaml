@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jackal-deployment
+  labels:
+    app: jackal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jackal
+  template:
+    metadata:
+      labels:
+        app: jackal
+    spec:
+      containers:
+        - name: jackal
+          image: ortuman/jackal:latest
+          workingDir: "/jackal"
+          command: ["jackal"]
+          ports:
+            - containerPort: 5222
+              name: listener
+            - containerPort: 15280
+              name: admin
+            - containerPort: 6060
+              name: http
+          volumeMounts:
+            - name: jackal-config-ref
+              mountPath: /jackal/config.yaml
+              subPath: config.yaml
+      volumes:
+        - name: jackal-config-ref
+          configMap:
+            name: jackal-config
+            items:
+              - key: k8s.config.yaml
+                path: config.yaml
